@@ -9,7 +9,7 @@ app.get("/", (req, res) => {
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(🌐 Web server listening on port ${PORT});
+  console.log(`🌐 Web server listening on port ${PORT}`);
 });
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
@@ -125,10 +125,10 @@ bot.onText(/\/start/, (msg) => {
     ]);
   }
 
-  bot.sendMessage(chatId, 👋 Chào *${fullName || "bạn"}*!  
+  bot.sendMessage(chatId, `👋 Chào *${fullName || "bạn"}*!  
 
 🤖 Đây là *BOT tự động lấy key Panel TMVFREE*.  
-Vui lòng chọn một chức năng bên dưới:, {
+Vui lòng chọn một chức năng bên dưới:`, {
     parse_mode: "Markdown",
     reply_markup: { inline_keyboard: menu },
   });
@@ -152,10 +152,10 @@ bot.on("callback_query", (query) => {
 
     const total = Object.values(userDailyCount).reduce((a, b) => a + b, 0);
     const report = Object.entries(userDailyCount)
-      .map(([uid, count]) => 👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT})
+      .map(([uid, count]) => `👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT}`)
       .join("\n");
 
-    const text = 📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\nTổng lượt tạo từ trước tới nay: *${TOTAL_COUNT}*\n\n +
+    const text = `📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\nTổng lượt tạo từ trước tới nay: *${TOTAL_COUNT}*\n\n` +
       (report || "📊 Chưa có ai sử dụng hôm nay.");
 
     bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
@@ -169,7 +169,7 @@ bot.on("callback_query", (query) => {
       return;
     }
 
-    bot.sendMessage(chatId, 📈 *Tổng số lượt key đã tạo từ trước tới nay:* *${TOTAL_COUNT}*, {
+    bot.sendMessage(chatId, `📈 *Tổng số lượt key đã tạo từ trước tới nay:* *${TOTAL_COUNT}*`, {
       parse_mode: "Markdown"
     });
     bot.answerCallbackQuery(query.id);
@@ -182,7 +182,7 @@ bot.on("callback_query", (query) => {
       return;
     }
 
-    bot.sendMessage(chatId, 👥 Số người dùng đã từng dùng bot: *${knownUsers.size}*, {
+    bot.sendMessage(chatId, `👥 Số người dùng đã từng dùng bot: *${knownUsers.size}*`, {
       parse_mode: "Markdown"
     });
     bot.answerCallbackQuery(query.id);
@@ -219,17 +219,17 @@ bot.on("message", (msg) => {
     ? DAILY_LIMIT - userDailyCount[userId]
     : "∞";
 
-  const message = 🤪 Chúc Mừng Bạn Đã Tạo Được Key Có Hạn Là: *${label}*
+  const message = `🤪 Chúc Mừng Bạn Đã Tạo Được Key Có Hạn Là: *${label}*
 
-✅*Serial:* \${text}\
+✅*Serial:* \`${text}\`
 
-🔑*Key:* \${key}\
+🔑*Key:* \`${key}\`
 *Bạn chỉ cần bấm vào dòng KEY là sẽ tự động được copy:*
 
 📊 Bạn còn *${remaining}/${DAILY_LIMIT}* lượt hôm nay.
 
 💻 *Cách Kích Hoạt Panel:*
-👉Bạn hãy mở *Photoshop* → chọn menu *Window > Extensions > TMVFREE* → nhập key vào ô bên dưới → *Done*!;
+👉Bạn hãy mở *Photoshop* → chọn menu *Window > Extensions > TMVFREE* → nhập key vào ô bên dưới → *Done*!`;
 
   bot.sendMessage(chatId, message, {
     parse_mode: "Markdown",
@@ -249,7 +249,7 @@ bot.on("message", (msg) => {
     const fullName = [msg.from.first_name, msg.from.last_name].filter(Boolean).join(" ");
     const username = msg.from.username || "(không có username)";
     bot.sendMessage(ADMIN_ID,
-      📢 User *${fullName}* (${username}) [ID: \${userId}\] vừa tạo key:\n\nSerial: \${text}\\nKey: \${key}\\nThời hạn: *${label}*, {
+      `📢 User *${fullName}* (${username}) [ID: \`${userId}\`] vừa tạo key:\n\nSerial: \`${text}\`\nKey: \`${key}\`\nThời hạn: *${label}*`, {
         parse_mode: "Markdown"
       });
   }
