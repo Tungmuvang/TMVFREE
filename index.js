@@ -107,9 +107,13 @@ bot.onText(/\/start/, (msg) => {
     ],
   ];
 
-  if (String(userId) === ADMIN_ID) {
-    menu.splice(1, 0, [{ text: "📊 Check số lượt hôm nay (Admin)", callback_data: "check_admin" }]);
-  }
+if (String(userId) === ADMIN_ID) {
+  menu.splice(1, 0, [
+    { text: "📊 Check hôm nay (Admin)", callback_data: "check_admin" },
+    { text: "📈 Tổng số lượt (Admin)", callback_data: "check_total" }
+  ]);
+}
+
 
   bot.sendMessage(chatId, `👋 Chào *${fullName || "bạn"}*!  
 
@@ -134,7 +138,9 @@ bot.on("callback_query", (query) => {
       bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo hôm nay.");
       bot.answerCallbackQuery(query.id);
       return;
+	  
     }
+	
 
     const total = Object.values(userDailyCount).reduce((a, b) => a + b, 0);
     const report = Object.entries(userDailyCount).map(
@@ -148,7 +154,17 @@ bot.on("callback_query", (query) => {
   }
 
   bot.answerCallbackQuery(query.id);
+  if (query.data === "check_total") {
+  if (String(userId) !== ADMIN_ID) {
+    bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo tổng.");
+    bot.answerCallbackQuery(query.id);
+    return;
+  }
+
+  bot.sendMessage(chatId, `📈 *Tổng số lượt key đã tạo từ trước tới nay:* *${totalCount}*`, {
+    parse_mode: "Markdown"
 });
+}
 
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
