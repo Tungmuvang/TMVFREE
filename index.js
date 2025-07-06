@@ -138,13 +138,10 @@ bot.on("callback_query", (query) => {
   const chatId = query.message.chat.id;
   const userId = query.from.id;
 
-bot.sendMessage(chatId, 
-  "🔑 Gửi *Serial* để bắt đầu nhận Key sử dụng TMVFREE nhé!\n" +
-  "⏳ Thời hạn key sẽ được tạo ngẫu nhiên — từ *1 tháng* cho đến *vĩnh viễn*!\n\n" +
-  "😄 *Mẹo nhỏ:* Tỉ lệ key *vĩnh viễn* khoảng *10%*, nên đừng ngại thử thêm vài lần để may mắn gọi tên bạn!",
-  { parse_mode: "Markdown" }
-);
-
+  if (query.data === "get_key") {
+    waitingForSerial[userId] = true;
+    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên từ 1 Tháng -> Vĩnh Viễn)");
+  }
 
   if (query.data === "check_admin") {
     if (String(userId) !== ADMIN_ID) {
