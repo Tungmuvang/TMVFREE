@@ -26,6 +26,13 @@ if (fs.existsSync("total_count.log")) {
   TOTAL_COUNT = parseInt(fs.readFileSync("total_count.log", "utf8")) || 0;
 }
 
+// Người dùng duy nhất
+let knownUsers = new Set();
+if (fs.existsSync("known_users.json")) {
+  const arr = JSON.parse(fs.readFileSync("known_users.json", "utf8"));
+  knownUsers = new Set(arr);
+}
+
 setInterval(() => {
   Object.keys(userDailyCount).forEach((uid) => (userDailyCount[uid] = 0));
 }, 24 * 60 * 60 * 1000);
@@ -98,6 +105,9 @@ bot.onText(/\/start/, (msg) => {
   const userId = msg.from.id;
   const fullName = [msg.from.first_name, msg.from.last_name].filter(Boolean).join(" ");
 
+  knownUsers.add(userId);
+  fs.writeFileSync("known_users.json", JSON.stringify([...knownUsers]));
+
   const menu = [
     [{ text: "🎁 Lấy Key TMV FREE", callback_data: "get_key" }],
     [
@@ -107,13 +117,13 @@ bot.onText(/\/start/, (msg) => {
     ],
   ];
 
-if (String(userId) === ADMIN_ID) {
-  menu.splice(1, 0, [
-    { text: "📊 Check hôm nay (Admin)", callback_data: "check_admin" },
-    { text: "📈 Tổng số lượt (Admin)", callback_data: "check_total" }
-  ]);
-}
-
+  if (String(userId) === ADMIN_ID) {
+    menu.splice(1, 0, [
+      { text: "📊 Check hôm nay ", callback_data: "check_admin" },
+      { text: "📈 Tổng số lượt", callback_data: "check_total" },
+      { text: "👥 Số người dùng", callback_data: "check_users" }
+    ]);
+  }
 
   bot.sendMessage(chatId, `👋 Chào *${fullName || "bạn"}*!  
 
@@ -133,37 +143,50 @@ bot.on("callback_query", (query) => {
     bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên từ 1 Tháng -> Vĩnh Viễn)");
   }
 
-if (query.data === "check_admin") {
-  if (String(userId) !== ADMIN_ID) {
-    bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo hôm nay.");
+  if (query.data === "check_admin") {
+    if (String(userId) !== ADMIN_ID) {
+      bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo hôm nay.");
+      bot.answerCallbackQuery(query.id);
+      return;
+    }
+
+    const total = Object.values(userDailyCount).reduce((a, b) => a + b, 0);
+    const report = Object.entries(userDailyCount)
+      .map(([uid, count]) => `👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT}`)
+      .join("\n");
+
+    const text = `📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\nTổng lượt tạo từ trước tới nay: *${TOTAL_COUNT}*\n\n` +
+      (report || "📊 Chưa có ai sử dụng hôm nay.");
+
+    bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
     bot.answerCallbackQuery(query.id);
-    return;
   }
 
-  const total = Object.values(userDailyCount).reduce((a, b) => a + b, 0);
-  const report = Object.entries(userDailyCount)
-    .map(([uid, count]) => `👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT}`)
-    .join("\n");
+  if (query.data === "check_total") {
+    if (String(userId) !== ADMIN_ID) {
+      bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo tổng.");
+      bot.answerCallbackQuery(query.id);
+      return;
+    }
 
-  const text = `📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\nTổng lượt tạo từ trước tới nay: *${TOTAL_COUNT}*\n\n` +
-    (report || "📊 Chưa có ai sử dụng hôm nay.");
-
-  bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
-  bot.answerCallbackQuery(query.id);
-}
-
-if (query.data === "check_total") {
-  if (String(userId) !== ADMIN_ID) {
-    bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo tổng.");
+    bot.sendMessage(chatId, `📈 *Tổng số lượt key đã tạo từ trước tới nay:* *${TOTAL_COUNT}*`, {
+      parse_mode: "Markdown"
+    });
     bot.answerCallbackQuery(query.id);
-    return;
   }
 
-  bot.sendMessage(chatId, `📈 *Tổng số lượt key đã tạo từ trước tới nay:* *${TOTAL_COUNT}*`, {
-    parse_mode: "Markdown"
-  });
-  bot.answerCallbackQuery(query.id);
-}
+  if (query.data === "check_users") {
+    if (String(userId) !== ADMIN_ID) {
+      bot.sendMessage(chatId, "🚫 Bạn không có quyền xem.");
+      bot.answerCallbackQuery(query.id);
+      return;
+    }
+
+    bot.sendMessage(chatId, `👥 Số người dùng đã từng dùng bot: *${knownUsers.size}*`, {
+      parse_mode: "Markdown"
+    });
+    bot.answerCallbackQuery(query.id);
+  }
 });
 
 bot.on("message", (msg) => {
@@ -221,11 +244,15 @@ bot.on("message", (msg) => {
       ],
     },
   });
+
   if (String(userId) !== ADMIN_ID) {
+    const fullName = [msg.from.first_name, msg.from.last_name].filter(Boolean).join(" ");
+    const username = msg.from.username || "(không có username)";
     bot.sendMessage(ADMIN_ID,
       `📢 User *${fullName}* (${username}) [ID: \`${userId}\`] vừa tạo key:\n\nSerial: \`${text}\`\nKey: \`${key}\`\nThời hạn: *${label}*`, {
         parse_mode: "Markdown"
       });
   }
+
   waitingForSerial[userId] = false;
 });
