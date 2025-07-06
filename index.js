@@ -149,7 +149,7 @@ bot.on("callback_query", (query) => {
   const userId = query.from.id;
 
 bot.sendMessage(chatId, 
-  "🔑 Gửi *Serial* để bắt đầu nhận Key sử dụng TMVFREE nhé!\n" +
+  "🔑 Gửi *Serial* để bắt đầu nhận Key sử dụng *TMVFREE* nhé!\n" +
   "⏳ Thời hạn key sẽ được tạo ngẫu nhiên — từ *1 tháng* cho đến *vĩnh viễn*!\n\n" +
   "😄 *Mẹo nhỏ:* Tỉ lệ key *vĩnh viễn* khoảng *10%*, nên đừng ngại thử thêm vài lần để may mắn gọi tên bạn!",
   { parse_mode: "Markdown" }
