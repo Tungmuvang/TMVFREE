@@ -164,7 +164,7 @@ if (query.data === "check_total") {
   });
   bot.answerCallbackQuery(query.id);
 }
-
+});
 
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
