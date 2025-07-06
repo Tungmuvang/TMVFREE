@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const app = express();
 app.get("/", (req, res) => {
-  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render!");
+  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render hihih!");
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
