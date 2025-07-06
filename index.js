@@ -2,10 +2,9 @@ require("dotenv").config();
 const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 
-// 👉 Webserver để giữ Replit luôn chạy
 const app = express();
 app.get("/", (req, res) => {
-  res.send("✅ Bot TMVFREE đang chạy!");
+  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render!");
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -20,13 +19,58 @@ const DAILY_LIMIT = 5;
 const userDailyCount = {};
 const ADMIN_ID = process.env.ADMIN_ID;
 
-// reset lượt hàng ngày
-setInterval(
-  () => {
-    Object.keys(userDailyCount).forEach((uid) => (userDailyCount[uid] = 0));
-  },
-  24 * 60 * 60 * 1000,
-);
+setInterval(() => {
+  Object.keys(userDailyCount).forEach((uid) => (userDailyCount[uid] = 0));
+}, 24 * 60 * 60 * 1000);
+
+// ===================== Key Logic =====================
+
+function strToHex(str) {
+  let padding = "";
+  for (let index = 0; index < str.length; index++) {
+    const charCode = str.charCodeAt(index).toString(16).padStart(2, '0');
+    padding += charCode;
+  }
+  return padding;
+}
+
+function salt(data, saltCode) {
+  let resultStr = "";
+  for (let index = 0; index < data.length; index++) {
+    const code = data.charCodeAt(index % data.length) ^ saltCode.charCodeAt(index % saltCode.length);
+    resultStr += String.fromCharCode(code);
+  }
+  return strToHex(resultStr);
+}
+
+function ctime(s) {
+  let a = 1, c = 0, h, o;
+  if (s) {
+    a = 0;
+    for (h = s.length - 1; h >= 0; h--) {
+      o = s.charCodeAt(h);
+      a = (a << 6 & 268435455) + o + (o << 14);
+      c = a & 266338304;
+      a = c !== 0 ? a ^ c >> 21 : a;
+    }
+  }
+  return String(a);
+}
+
+function generateKey(serial, duration) {
+  const STORE_SECRET_KEY = '125e11574c5a42535a595547585443515b58545b514358545143545143545143';
+  const date = new Date();
+
+  switch (duration) {
+    case '1month': date.setMonth(date.getMonth() + 1); break;
+    case '3month': date.setMonth(date.getMonth() + 3); break;
+    case '6month': date.setMonth(date.getMonth() + 6); break;
+    case '12month': date.setMonth(date.getMonth() + 12); break;
+    case '1200month': date.setMonth(date.getMonth() + 1200); break; // vĩnh viễn
+  }
+
+  return salt(ctime(serial) + "|" + Math.floor(date.getTime() / 1000), STORE_SECRET_KEY);
+}
 
 function randomDuration() {
   const options = [
@@ -40,70 +84,42 @@ function randomDuration() {
   return options[idx];
 }
 
-function generateKey(serial) {
-  return Buffer.from(serial).toString("hex").slice(0, 16);
-}
+// ===================== BOT Logic =====================
 
-// 👉 Menu start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  const fullName = [msg.from.first_name, msg.from.last_name]
-    .filter(Boolean)
-    .join(" ");
+  const fullName = [msg.from.first_name, msg.from.last_name].filter(Boolean).join(" ");
 
   const menu = [
     [{ text: "🎁 Lấy Key TMV FREE", callback_data: "get_key" }],
     [
-      {
-        text: "❤️ TMV VIP",
-        url: "https://www.tungmuvang.in/2023/08/tmv-panel-retouch-lam-anh-chuyen-nghiep.html",
-      },
-      {
-        text: "💚 TMV AUTO",
-        url: "https://www.tungmuvang.in/2023/12/ra-mat-ban-panel-chuyen-danh-cho-dan.html",
-      },
-      {
-        text: "💜 Adobe BQ",
-        url: "https://www.tungmuvang.in/2025/03/thong-tin-cac-goi-adobe-ban-quyen-tmv.html",
-      },
+      { text: "❤️ TMV VIP", url: "https://www.tungmuvang.in/2023/08/tmv-panel-retouch-lam-anh-chuyen-nghiep.html" },
+      { text: "💚 TMV AUTO", url: "https://www.tungmuvang.in/2023/12/ra-mat-ban-panel-chuyen-danh-cho-dan.html" },
+      { text: "💜 Adobe BQ", url: "https://www.tungmuvang.in/2025/03/thong-tin-cac-goi-adobe-ban-quyen-tmv.html" },
     ],
   ];
 
   if (String(userId) === ADMIN_ID) {
-    menu.splice(1, 0, [
-      {
-        text: "📊 Check số lượt hôm nay (Admin)",
-        callback_data: "check_admin",
-      },
-    ]);
+    menu.splice(1, 0, [{ text: "📊 Check số lượt hôm nay (Admin)", callback_data: "check_admin" }]);
   }
-  bot.sendMessage(
-    chatId,
-    `👋 Chào *${fullName || "bạn"}*!  
+
+  bot.sendMessage(chatId, `👋 Chào *${fullName || "bạn"}*!  
 
 🤖 Đây là *BOT tự động lấy key Panel TMVFREE*.  
-  Vui lòng chọn một chức năng bên dưới:`,
-    {
-      parse_mode: "Markdown",
-      reply_markup: {
-        inline_keyboard: menu,
-      },
-    },
-  );
+Vui lòng chọn một chức năng bên dưới:`, {
+    parse_mode: "Markdown",
+    reply_markup: { inline_keyboard: menu },
+  });
 });
 
-// 👉 Xử lý bấm nút
 bot.on("callback_query", (query) => {
   const chatId = query.message.chat.id;
   const userId = query.from.id;
 
   if (query.data === "get_key") {
     waitingForSerial[userId] = true;
-    bot.sendMessage(
-      chatId,
-      "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên từ 1 Tháng -> Vĩnh Viễn)",
-    );
+    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên từ 1 Tháng -> Vĩnh Viễn)");
   }
 
   if (query.data === "check_admin") {
@@ -114,19 +130,11 @@ bot.on("callback_query", (query) => {
     }
 
     const total = Object.values(userDailyCount).reduce((a, b) => a + b, 0);
+    const report = Object.entries(userDailyCount).map(
+      ([uid, count]) => `👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT}`
+    ).join("\n");
 
-    const report = Object.entries(userDailyCount)
-      .map(
-        ([uid, count]) =>
-          `👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT}`,
-      )
-      .join("\n");
-
-    const text =
-      `📊 *Báo cáo hôm nay:*\n\n` +
-      `Tổng lượt tạo hôm nay: *${total}*\n\n` +
-      (report || "📊 Chưa có ai sử dụng hôm nay.");
-
+    const text = `📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\n\n` + (report || "📊 Chưa có ai sử dụng hôm nay.");
     bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
   }
 
@@ -139,7 +147,6 @@ bot.on("message", (msg) => {
   const text = msg.text?.trim();
 
   if (!waitingForSerial[userId]) return;
-
   if (!text || text.startsWith("/")) return;
 
   if (!userDailyCount[userId]) userDailyCount[userId] = 0;
@@ -155,8 +162,8 @@ bot.on("message", (msg) => {
     return;
   }
 
-  const { label } = randomDuration();
-  const key = generateKey(text);
+  const { label, value } = randomDuration();
+  const key = generateKey(text, value);
 
   userDailyCount[userId]++;
   const remaining = DAILY_LIMIT - userDailyCount[userId];
@@ -179,18 +186,9 @@ bot.on("message", (msg) => {
       inline_keyboard: [
         [{ text: "🎁 Lấy Key Khác", callback_data: "get_key" }],
         [
-          {
-            text: "❤️ TMV VIP",
-            url: "https://www.tungmuvang.in/2023/08/tmv-panel-retouch-lam-anh-chuyen-nghiep.html",
-          },
-          {
-            text: "💚 TMV AUTO",
-            url: "https://www.tungmuvang.in/2023/12/ra-mat-ban-panel-chuyen-danh-cho-dan.html",
-          },
-          {
-            text: "💜 Adobe BQ",
-            url: "https://www.tungmuvang.in/2025/03/thong-tin-cac-goi-adobe-ban-quyen-tmv.html",
-          },
+          { text: "❤️ TMV VIP", url: "https://www.tungmuvang.in/2023/08/tmv-panel-retouch-lam-anh-chuyen-nghiep.html" },
+          { text: "💚 TMV AUTO", url: "https://www.tungmuvang.in/2023/12/ra-mat-ban-panel-chuyen-danh-cho-dan.html" },
+          { text: "💜 Adobe BQ", url: "https://www.tungmuvang.in/2025/03/thong-tin-cac-goi-adobe-ban-quyen-tmv.html" },
         ],
       ],
     },
