@@ -88,15 +88,25 @@ function generateKey(serial, duration) {
 
 function randomDuration() {
   const options = [
-    { value: "1month", label: "1 Tháng" },
-    { value: "3month", label: "3 Tháng" },
-    { value: "6month", label: "6 Tháng" },
-    { value: "12month", label: "12 Tháng" },
-    { value: "1200month", label: "Vĩnh Viễn" },
+    { value: "1month", label: "1 Tháng", weight: 25 },
+    { value: "3month", label: "3 Tháng", weight: 25 },
+    { value: "6month", label: "6 Tháng", weight: 25 },
+    { value: "12month", label: "12 Tháng", weight: 15 },
+    { value: "1200month", label: "Vĩnh Viễn", weight: 10 },
   ];
-  const idx = Math.floor(Math.random() * options.length);
-  return options[idx];
+
+  const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+  const rand = Math.random() * totalWeight;
+
+  let sum = 0;
+  for (const opt of options) {
+    sum += opt.weight;
+    if (rand <= sum) return opt;
+  }
+
+  return options[0]; // fallback nếu có lỗi
 }
+
 
 // ===================== BOT Logic =====================
 
@@ -140,7 +150,7 @@ bot.on("callback_query", (query) => {
 
   if (query.data === "get_key") {
     waitingForSerial[userId] = true;
-    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên từ 1 Tháng -> Vĩnh Viễn)");
+    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên từ 1 Tháng -> Vĩnh Viễn) <br> 😆 Tỉ lệ vĩnh viễn 10% khá thấp nên hãy cố tạo nhiều để trúng KEY Vĩnh Viễn Bạn nhé !");
   }
 
   if (query.data === "check_admin") {
