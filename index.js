@@ -133,38 +133,38 @@ bot.on("callback_query", (query) => {
     bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên từ 1 Tháng -> Vĩnh Viễn)");
   }
 
-  if (query.data === "check_admin") {
-    if (String(userId) !== ADMIN_ID) {
-      bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo hôm nay.");
-      bot.answerCallbackQuery(query.id);
-      return;
-	  
-    }
-	
-
-    const total = Object.values(userDailyCount).reduce((a, b) => a + b, 0);
-    const report = Object.entries(userDailyCount).map(
-      ([uid, count]) => `👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT}`
-    ).join("\n");
-
-    const text = `📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\nTổng lượt tạo từ trước tới nay: *${TOTAL_COUNT}*\n\n` +
-      (report || "📊 Chưa có ai sử dụng hôm nay.");
-
-    bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
+if (query.data === "check_admin") {
+  if (String(userId) !== ADMIN_ID) {
+    bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo hôm nay.");
+    bot.answerCallbackQuery(query.id);
+    return;
   }
 
+  const total = Object.values(userDailyCount).reduce((a, b) => a + b, 0);
+  const report = Object.entries(userDailyCount)
+    .map(([uid, count]) => `👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT}`)
+    .join("\n");
+
+  const text = `📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\nTổng lượt tạo từ trước tới nay: *${TOTAL_COUNT}*\n\n` +
+    (report || "📊 Chưa có ai sử dụng hôm nay.");
+
+  bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
   bot.answerCallbackQuery(query.id);
-  if (query.data === "check_total") {
+}
+
+if (query.data === "check_total") {
   if (String(userId) !== ADMIN_ID) {
     bot.sendMessage(chatId, "🚫 Bạn không có quyền xem báo cáo tổng.");
     bot.answerCallbackQuery(query.id);
     return;
   }
 
-  bot.sendMessage(chatId, `📈 *Tổng số lượt key đã tạo từ trước tới nay:* *${totalCount}*`, {
+  bot.sendMessage(chatId, `📈 *Tổng số lượt key đã tạo từ trước tới nay:* *${TOTAL_COUNT}*`, {
     parse_mode: "Markdown"
-});
+  });
+  bot.answerCallbackQuery(query.id);
 }
+
 
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
