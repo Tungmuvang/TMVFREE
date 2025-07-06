@@ -9,7 +9,8 @@ app.get("/", (req, res) => {
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(🌐 Web server listening on port ${PORT});
+ console.log(`🌐 Web server listening on port ${PORT}`);
+
 });
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
