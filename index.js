@@ -1,6 +1,7 @@
 require("dotenv").config();
 const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
+const fs = require("fs");
 
 const app = express();
 app.get("/", (req, res) => {
@@ -18,6 +19,12 @@ const waitingForSerial = {};
 const DAILY_LIMIT = 5;
 const userDailyCount = {};
 const ADMIN_ID = process.env.ADMIN_ID;
+
+// Tổng lượt all-time
+let TOTAL_COUNT = 0;
+if (fs.existsSync("total_count.log")) {
+  TOTAL_COUNT = parseInt(fs.readFileSync("total_count.log", "utf8")) || 0;
+}
 
 setInterval(() => {
   Object.keys(userDailyCount).forEach((uid) => (userDailyCount[uid] = 0));
@@ -134,7 +141,9 @@ bot.on("callback_query", (query) => {
       ([uid, count]) => `👤 UserID: ${uid} — Đã dùng: ${count}/${DAILY_LIMIT}`
     ).join("\n");
 
-    const text = `📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\n\n` + (report || "📊 Chưa có ai sử dụng hôm nay.");
+    const text = `📊 *Báo cáo hôm nay:*\n\nTổng lượt tạo hôm nay: *${total}*\nTổng lượt tạo từ trước tới nay: *${TOTAL_COUNT}*\n\n` +
+      (report || "📊 Chưa có ai sử dụng hôm nay.");
+
     bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
   }
 
@@ -149,24 +158,27 @@ bot.on("message", (msg) => {
   if (!waitingForSerial[userId]) return;
   if (!text || text.startsWith("/")) return;
 
-  if (!userDailyCount[userId]) userDailyCount[userId] = 0;
+  if (String(userId) !== ADMIN_ID) {
+    if (!userDailyCount[userId]) userDailyCount[userId] = 0;
 
-  if (userDailyCount[userId] >= DAILY_LIMIT) {
-    bot.sendMessage(chatId, "🚫 Bạn đã vượt quá số lượt hôm nay.");
-    waitingForSerial[userId] = false;
-    return;
-  }
+    if (userDailyCount[userId] >= DAILY_LIMIT) {
+      bot.sendMessage(chatId, "🚫 Bạn đã vượt quá số lượt hôm nay.");
+      waitingForSerial[userId] = false;
+      return;
+    }
 
-  if (text.length < 5) {
-    bot.sendMessage(chatId, "❌ Serial quá ngắn. Vui lòng thử lại.");
-    return;
+    userDailyCount[userId]++;
   }
 
   const { label, value } = randomDuration();
   const key = generateKey(text, value);
 
-  userDailyCount[userId]++;
-  const remaining = DAILY_LIMIT - userDailyCount[userId];
+  TOTAL_COUNT++;
+  fs.writeFileSync("total_count.log", TOTAL_COUNT.toString());
+
+  const remaining = String(userId) !== ADMIN_ID
+    ? DAILY_LIMIT - userDailyCount[userId]
+    : "∞";
 
   const message = `🤪 Chúc Mừng Bạn Đã Tạo Được Key Có Hạn Là: *${label}*
 
