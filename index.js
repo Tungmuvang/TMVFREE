@@ -221,6 +221,11 @@ bot.on("message", (msg) => {
       ],
     },
   });
-
+  if (String(userId) !== ADMIN_ID) {
+    bot.sendMessage(ADMIN_ID,
+      `📢 User *${fullName}* (${username}) [ID: \`${userId}\`] vừa tạo key:\n\nSerial: \`${text}\`\nKey: \`${key}\`\nThời hạn: *${label}*`, {
+        parse_mode: "Markdown"
+      });
+  }
   waitingForSerial[userId] = false;
 });
