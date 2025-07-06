@@ -138,8 +138,6 @@ bot.on("callback_query", (query) => {
   const chatId = query.message.chat.id;
   const userId = query.from.id;
 
-  if (query.data === "get_key") {
-    waitingForSerial[userId] = true;
 bot.sendMessage(chatId, 
   "🔑 Gửi *Serial* để bắt đầu nhận Key sử dụng TMVFREE nhé!\n" +
   "⏳ Thời hạn key sẽ được tạo ngẫu nhiên — từ *1 tháng* cho đến *vĩnh viễn*!\n\n" +
