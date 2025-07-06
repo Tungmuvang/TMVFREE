@@ -71,21 +71,6 @@ function ctime(s) {
   return String(a);
 }
 
-function generateKey(serial, duration) {
-  const STORE_SECRET_KEY = '125e11574c5a42535a595547585443515b58545b514358545143545143545143';
-  const date = new Date();
-
-  switch (duration) {
-    case '1month': date.setMonth(date.getMonth() + 1); break;
-    case '3month': date.setMonth(date.getMonth() + 3); break;
-    case '6month': date.setMonth(date.getMonth() + 6); break;
-    case '12month': date.setMonth(date.getMonth() + 12); break;
-    case '1200month': date.setMonth(date.getMonth() + 1200); break; // vĩnh viễn
-  }
-
-  return salt(ctime(serial) + "|" + Math.floor(date.getTime() / 1000), STORE_SECRET_KEY);
-}
-
 function randomDuration() {
   const options = [
     { value: "1month", label: "1 Tháng", weight: 25 },
@@ -101,11 +86,28 @@ function randomDuration() {
   let sum = 0;
   for (const opt of options) {
     sum += opt.weight;
-    if (rand <= sum) return opt;
+    if (rand <= sum) return { value: opt.value, label: opt.label };
   }
 
-  return options[0]; // fallback nếu có lỗi
+  return { value: "1month", label: "1 Tháng" }; // fallback
 }
+
+function generateKey(serial, duration) {
+  const STORE_SECRET_KEY = '125e11574c5a42535a595547585443515b58545b514358545143545143545143';
+  const date = new Date();
+
+  switch (duration) {
+    case '1month': date.setMonth(date.getMonth() + 1); break;
+    case '3month': date.setMonth(date.getMonth() + 3); break;
+    case '6month': date.setMonth(date.getMonth() + 6); break;
+    case '12month': date.setMonth(date.getMonth() + 12); break;
+    case '1200month': date.setMonth(date.getMonth() + 1200); break;
+    default: date.setMonth(date.getMonth() + 1); // fallback
+  }
+
+  return salt(ctime(serial) + "|" + Math.floor(date.getTime() / 1000), STORE_SECRET_KEY);
+}
+
 
 
 // ===================== BOT Logic =====================
