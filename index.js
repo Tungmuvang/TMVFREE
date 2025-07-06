@@ -170,9 +170,9 @@ bot.on("message", (msg) => {
 
   const message = `🤪 Chúc Mừng Bạn Đã Tạo Được Key Có Hạn Là: *${label}*
 
-✅ *Serial:* \`${text}\`
+✅*Serial:* \`${text}\`
 
-🔑 *Key:* \`${key}\`
+🔑*Key:* \`${key}\`
 *Bạn chỉ cần bấm vào dòng KEY là sẽ tự động được copy:*
 
 📊 Bạn còn *${remaining}/${DAILY_LIMIT}* lượt hôm nay.
