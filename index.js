@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const app = express();
 app.get("/", (req, res) => {
-  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render hihih!");
+  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render hihihiiiiiiiiiiiiiiiiiiiiii!");
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -88,14 +88,24 @@ function generateKey(serial, duration) {
 
 function randomDuration() {
   const options = [
-    { value: "1month", label: "1 Tháng" },
-    { value: "3month", label: "3 Tháng" },
-    { value: "6month", label: "6 Tháng" },
-    { value: "12month", label: "12 Tháng" },
-    { value: "1200month", label: "Vĩnh Viễn" },
+    { value: "1month", label: "1 Tháng", weight: 40 },
+    { value: "3month", label: "3 Tháng", weight: 30 },
+    { value: "6month", label: "6 Tháng", weight: 15 },
+    { value: "12month", label: "12 Tháng", weight: 10 },
+    { value: "1200month", label: "Vĩnh Viễn", weight: 5 },
   ];
-  const idx = Math.floor(Math.random() * options.length);
-  return options[idx];
+
+  const totalWeight = options.reduce((sum, option) => sum + option.weight, 0);
+  let random = Math.random() * totalWeight;
+
+  for (const option of options) {
+    if (random < option.weight) {
+      return option;
+    }
+    random -= option.weight;
+  }
+
+  return options[0]; // Fallback to first option
 }
 
 // ===================== BOT Logic =====================
@@ -140,7 +150,7 @@ bot.on("callback_query", (query) => {
 
   if (query.data === "get_key") {
     waitingForSerial[userId] = true;
-    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên từ 1 Tháng -> Vĩnh Viễn)");
+    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được sản sinh ngẫu nhiên: 1 Tháng (40%), 3 Tháng (30%), 6 Tháng (15%), 12 Tháng (10%), Vĩnh Viễn (5%))");
   }
 
   if (query.data === "check_admin") {
