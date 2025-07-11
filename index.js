@@ -88,11 +88,11 @@ function generateKey(serial, duration) {
 
 function randomDuration() {
   const options = [
-    { value: "1month", label: "1 Tháng", weight: 40 },
+    { value: "1month", label: "1 Tháng", weight: 48 },
     { value: "3month", label: "3 Tháng", weight: 30 },
     { value: "6month", label: "6 Tháng", weight: 15 },
-    { value: "12month", label: "12 Tháng", weight: 10 },
-    { value: "1200month", label: "Vĩnh Viễn", weight: 5 },
+    { value: "12month", label: "12 Tháng", weight: 5 },
+    { value: "1200month", label: "Vĩnh Viễn", weight: 2 },
   ];
 
   const totalWeight = options.reduce((sum, option) => sum + option.weight, 0);
@@ -148,10 +148,6 @@ bot.on("callback_query", (query) => {
   const chatId = query.message.chat.id;
   const userId = query.from.id;
 
-  if (query.data === "get_key") {
-    waitingForSerial[userId] = true;
-    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được sản sinh ngẫu nhiên: 1 Tháng (40%), 3 Tháng (30%), 6 Tháng (15%), 12 Tháng (10%), Vĩnh Viễn (5%))");
-  }
 
   if (query.data === "check_admin") {
     if (String(userId) !== ADMIN_ID) {
