@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const app = express();
 app.get("/", (req, res) => {
-  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render hihihiiiiiiiiiiiiiiiiiiiiii! fix vinh vien");
+  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render hihihiiiiiiiiiiiiiiiiiiiiii!");
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -135,7 +135,7 @@ bot.onText(/\/start/, (msg) => {
     ]);
   }
 
-  bot.sendMessage(chatId, `👋 Chào *${fullName || "bạn"}*!  
+  bot.sendMessage(chatId, `👋 Chào *${fullName || "bần"}*!  
 
 🤖 Đây là *BOT tự động lấy key Panel TMVFREE*.  
 Vui lòng chọn một chức năng bên dưới:`, {
@@ -150,7 +150,7 @@ bot.on("callback_query", (query) => {
 
   if (query.data === "get_key") {
     waitingForSerial[userId] = true;
-    bot.sendMessage(chatId, "⛔ Tỉ lệ ra VĨNH VIỄN khá thấp nên bạn cứ thử nhiều lần xem sao nhé !");
+    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được sản sinh ngẫu nhiên: 1 Tháng (48%), 3 Tháng (30%), 6 Tháng (15%), 12 Tháng (5%), Vĩnh Viễn (2%))");
   }
 
   if (query.data === "check_admin") {
