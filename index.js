@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const app = express();
 app.get("/", (req, res) => {
-  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render hihihiiiiiiiiiiiiiiiiiiiiii!");
+  res.send("✅ Bot TMVFREE đang chạy 24/7 trên Render hihihiiiiiiiiiiiiiiiiiiiiii! fix vinh vien");
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -148,6 +148,10 @@ bot.on("callback_query", (query) => {
   const chatId = query.message.chat.id;
   const userId = query.from.id;
 
+  if (query.data === "get_key") {
+    waitingForSerial[userId] = true;
+    bot.sendMessage(chatId, "⛔ Tỉ lệ ra VĨNH VIỄN khá thấp nên bạn cứ thử nhiều lần xem sao nhé !");
+  }
 
   if (query.data === "check_admin") {
     if (String(userId) !== ADMIN_ID) {
