@@ -150,7 +150,7 @@ bot.on("callback_query", (query) => {
 
   if (query.data === "get_key") {
     waitingForSerial[userId] = true;
-    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được sản sinh ngẫu nhiên: 1 Tháng (48%), 3 Tháng (30%), 6 Tháng (15%), 12 Tháng (5%), Vĩnh Viễn (2%))");
+    bot.sendMessage(chatId, "🔑 Vui lòng gửi Serial để lấy key: (Thời gian sử dụng sẽ được tạo ngẫu nhiên: 1 Tháng > Vĩnh Viễn)");
   }
 
   if (query.data === "check_admin") {
