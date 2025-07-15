@@ -126,7 +126,7 @@ bot.onText(/\/start/, (msg) => {
       { text: "💜 Adobe BQ", url: "https://www.tungmuvang.in/2025/03/thong-tin-cac-goi-adobe-ban-quyen-tmv.html" },
     ],
     // Thêm nút mới trên một hàng riêng
-    [{ text: "HaiCaoYun - Chỉnh Ảnh Không Giới Hạn", url: "https://www.tungmuvang.in/p/app-haicaoyun.html" }],
+    [{ text: "✨HaiCaoYun - Chỉnh Ảnh Không Giới Hạn✨", url: "https://www.tungmuvang.in/p/app-haicaoyun.html" }],
   ];
 
   if (String(userId) === ADMIN_ID) {
