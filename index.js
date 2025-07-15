@@ -253,7 +253,7 @@ bot.on("message", (msg) => {
           { text: "💚 TMV AUTO", url: "https://www.tungmuvang.in/2023/12/ra-mat-ban-panel-chuyen-danh-cho-dan.html" },
           { text: "💜 Adobe BQ", url: "https://www.tungmuvang.in/2025/03/thong-tin-cac-goi-adobe-ban-quyen-tmv.html" },
           // Thêm nút mới ở đây
-          { text: "HaiCaoYun - Chỉnh Ảnh Không Giới Hạn", url: "https://www.tungmuvang.in/p/app-haicaoyun.html" },
+          [{ text: "HaiCaoYun - Chỉnh Ảnh Không Giới Hạn", url: "https://www.tungmuvang.in/p/app-haicaoyun.html" }],
         ],
       ],
     },
